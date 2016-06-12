@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MBW;
 using System.Collections.Generic;
+using System.Dynamic;
 
 namespace CSVExtensionsTest
 {
@@ -140,6 +141,40 @@ namespace CSVExtensionsTest
                 return list;
             }
 
+            private List<dynamic> GetDynamicTestDataList()
+            {
+                List<dynamic> list = new List<dynamic>();
+
+                dynamic item1 = new ExpandoObject();
+
+                item1.Id = 1;
+                item1.Name = "Bill Gates";
+                item1.Email = "billg@microsoft.com";
+                item1.SomethingElse = "Hello";
+
+                list.Add(item1);
+
+                dynamic item2 = new ExpandoObject();
+
+                item2.Id = 2;
+                item2.Name = "Elon Musk";
+                item2.Email = "ironman@tesla.com";
+                item2.SomethingElse = "Bonjour!";
+
+                list.Add(item2);
+
+                dynamic item3 = new ExpandoObject();
+
+                item3.Id = 3;
+                item3.Name = "Mr Bean";
+                item3.Email = "bean@noabsolutely.wtf";
+                item3.SomethingElse = "Hello, \r\n\r\nThis is a test field, with all sorts of \"things\" in it.";
+
+                list.Add(item3);
+
+                return list;
+            }
+
             private List<string> GetExpectedResultList()
             {
                 return new List<string>()
@@ -187,6 +222,29 @@ namespace CSVExtensionsTest
                 Assert.AreEqual(4, result.Count);
                 Assert.AreEqual(expectedFirstRow, result[0]);
             }
+
+            [TestMethod]
+            public void Should_Return_An_IEnumarable_Of_CSV_Strings_With_Header_From_A_Dynamic_Object()
+            {
+                List<dynamic> data = GetDynamicTestDataList();
+                var expectedResults = GetExpectedResultList();
+                var expectedFirstRow = "Id,Name,Email,SomethingElse\r\n";
+
+                List<string> result = new List<string>();
+
+                foreach (var line in data.ToCsv())
+                {
+                    result.Add(line);
+                }
+
+                Assert.AreEqual(4, result.Count);
+
+                Assert.AreEqual(expectedFirstRow, result[0]);
+                Assert.AreEqual(expectedResults[0], result[1]);
+                Assert.AreEqual(expectedResults[1], result[2]);
+                Assert.AreEqual(expectedResults[2], result[3]);
+            }
+
 
         }
 
